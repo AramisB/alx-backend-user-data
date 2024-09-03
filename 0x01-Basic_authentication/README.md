@@ -1,76 +1,38 @@
-What Authentication Means
-Authentication is the process of verifying the identity of a user or a system attempting to access a resource. It ensures that only legitimate users or systems are allowed access, based on their credentials (such as username and password) or other forms of tokens.
+# Simple API
 
-Authentication can be of various types:
-Basic Authentication: Uses a username and password encoded in Base64.
-Token-Based Authentication: Uses tokens such as JWT (JSON Web Tokens).
-OAuth2: A popular authorization framework that provides limited access to resources on behalf of the user.
+Simple HTTP API for playing with `User` model.
 
-What Base64 Is
-Base64 is an encoding scheme that converts binary data into an ASCII string format. It is commonly used to encode data that needs to be stored and transferred over mediums that do not support binary data, such as email or HTTP headers.
+## Files
 
-Characteristics of Base64:
-Encodes binary data (such as images, files, or strings) into ASCII characters.
-Often used in authentication, data storage, and transmission to make the data safe for protocols that only support text.
-Represents data in a radix-64 representation, using characters A-Z, a-z, 0-9, +, and /.
+### `models/`
 
-How to Encode a String in Base64
-To encode a string in Base64 using Python, you can use the base64 module:
-import base64
+- `base.py`: base of all models of the API - handle serialization to file
+- `user.py`: user model
 
-# Example string to encode
-message = "Hello, World!"
+### `api/v1`
 
-# Convert the string to bytes
-message_bytes = message.encode('utf-8')
+- `app.py`: entry point of the API
+- `views/index.py`: basic endpoints of the API: `/status` and `/stats`
+- `views/users.py`: all users endpoints
 
-# Encode the bytes to Base64
-base64_bytes = base64.b64encode(message_bytes)
+## Setup
 
-# Convert the Base64 bytes back to a string
-base64_message = base64_bytes.decode('utf-8')
+```
+$ pip3 install -r requirements.txt
+```
 
-print(base64_message)  # Output: SGVsbG8sIFdvcmxkIQ==
+## Run
 
-What Basic Authentication Means
-Basic Authentication is a simple authentication mechanism built into the HTTP protocol. It requires the client to send a username and password with each request. The credentials are combined into a single string, separated by a colon (username:password), and then encoded in Base64.
+```
+$ API_HOST=0.0.0.0 API_PORT=5000 python3 -m api.v1.app
+```
 
-Example:
-Username: user
-Password: password
-Combined: user:password
-Base64 Encoded: dXNlcjpwYXNzd29yZA==
-The Base64-encoded credentials are sent in the Authorization header of the HTTP request, in the following format:
-makefile
-Authorization: Basic dXNlcjpwYXNzd29yZA==
+## Routes
 
-How to Send the Authorization Header
-To send the Authorization header with Basic Authentication in Python, you can use the requests library:
-
-import requests
-import base64
-
-# Credentials
-username = "user"
-password = "password"
-
-# Encode credentials in Base64
-credentials = f"{username}:{password}"
-encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-
-# URL for the API
-url = "https://api.example.com/resource"
-
-# Prepare headers
-headers = {
-    "Authorization": f"Basic {encoded_credentials}"
-}
-
-# Send the request
-response = requests.get(url, headers=headers)
-
-# Print the response
-print(response.text)
-
-Conclusion
-This document has provided a basic understanding of authentication, Base64 encoding, and Basic authentication. It also includes a practical example of sending an Authorization header using Python. These concepts are fundamental for building secure applications and communicating securely over HTTP.
+- `GET /api/v1/status`: returns the status of the API
+- `GET /api/v1/stats`: returns some stats of the API
+- `GET /api/v1/users`: returns the list of users
+- `GET /api/v1/users/:id`: returns an user based on the ID
+- `DELETE /api/v1/users/:id`: deletes an user based on the ID
+- `POST /api/v1/users`: creates a new user (JSON parameters: `email`, `password`, `last_name` (optional) and `first_name` (optional))
+- `PUT /api/v1/users/:id`: updates an user based on the ID (JSON parameters: `last_name` and `first_name`)
