@@ -31,7 +31,7 @@ class Auth:
             path += '/'
 
         for excluded_path in excluded_paths:
-            # Normalize the excluded_pathgit 
+            # Normalize the excluded_pathgit
             if not excluded_path.endswith('/'):
                 excluded_path += '/'
 
