@@ -7,11 +7,18 @@ from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
 from flask_cors import (CORS, cross_origin)
 import os
-
+from api.v1.auth.auth import Auth
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+
+auth = None
+
+auth_type = getenv("AUTH_TYPE")
+
+if auth_type:
+    auth = Auth()
 
 
 @app.errorhandler(404)
@@ -35,6 +42,38 @@ def forbidden_error(error) -> str:
     Custom JSON response for 403 forbidden errors
     """
     return jsonify({"error": "Forbidden"}), 403
+
+
+@app.before_request
+def before_request_handler():
+    """
+    Handler for filtering each request before processing
+    if auth is None, do nothing
+    if request.path is not part of this list
+    ['/api/v1/status/', '/api/v1/unauthorized/' '/api/v1/forbidden/'],
+    do nothing - you must use the method require_auth from the auth instance
+    if auth.authorization_header(request) returns None,
+    raise the error 401 - you must use abort
+    if auth.current_user(request) returns None,
+    raise the error 403 - you must use abort
+    """
+    if auth is None:
+        return
+
+    excluded_paths = [
+        '/api/v1/status/',
+        '/api/v1/unauthorized/',
+        '/api/v1/forbidden/'
+        ]
+
+    if not auth.require_auth(request.path, excluded_paths):
+        return
+
+    if auth.authorization_header(request) is None:
+        abort(401)
+
+    if auth.current_user(request) is None:
+        abort(403)
 
 
 if __name__ == "__main__":
