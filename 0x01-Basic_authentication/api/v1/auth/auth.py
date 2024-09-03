@@ -31,15 +31,17 @@ class Auth:
             path += '/'
 
         for excluded_path in excluded_paths:
-            # Normalize the excluded_pathgit
-            if not excluded_path.endswith('/'):
-                excluded_path += '/'
+            # Normalize the excluded path
+            if excluded_path.endswith('*'):
+                # Check if the path matches the prefix before the '*'
+                if path.startswith(excluded_path[:-1]):
+                    return False
+            else:
+                # Match exact path with trailing slash normalization
+                if path == excluded_path or path + '/' == excluded_path:
+                    return False
 
-            # Check if the path starts with the excluded path
-            if path.startswith(excluded_path):
-                return False
         return True
-
     def authorization_header(self, request=None) -> str:
         """
         Returns none
