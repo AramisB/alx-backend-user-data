@@ -2,7 +2,7 @@
 """
 App module
 """
-from flask import app, jsonify, Flask, request
+from flask import app, jsonify, Flask, request, redirect
 from auth import Auth
 import flask
 
@@ -55,6 +55,7 @@ def users() -> None:
             "message": "email already registered"
         }), 400
 
+
 @app.route('/sessions', methods=['POST'])
 def login() -> None:
     """
@@ -77,20 +78,59 @@ def login() -> None:
             "message": "email and password are required"
             }), 400
 
-    try:
-        user = AUTH.valid_login(email, password)
-        if user:
-            session_id = AUTH.create_session(user.email)
-        else:
-            flask.abort(401)
+    if AUTH.valid_login(email, password):
+        session_id = AUTH.create_session(email)
         response = jsonify({
-            "email": user.email,
+            "email": email,
             "message": "logged in"
         })
         response.set_cookie("session_id", session_id)
         return response
-    except ValueError:
+    else:
         flask.abort(401)
+
+
+@app.route('/sessions', methods=['DELETE'])
+def logout() -> None:
+    """
+    respond to the DELETE /sessions route.
+    The request is expected to contain the session ID
+    as a cookie with key "session_id".
+    Find the user with the requested session ID.
+    If the user exists destroy the session
+    and redirect the user to GET /.
+    If the user does not exist, respond with a 403 HTTP status.
+    """
+    session_id = request.cookies.get("session_id")
+    if session_id:
+        user = AUTH.get_user_from_session_id(session_id)
+        if user:
+            AUTH.destroy_session(user.id)
+            return redirect('/')
+        else:
+            flask.abort(403)
+    else:
+        flask.abort(403)
+
+
+@app.route('/profile', methods=['GET'])
+def profile() -> None:
+    """
+    The request is expected to contain a session_id cookie.
+    Use it to find the user. If the user exist,
+    respond with a 200 HTTP status and the following JSON payload:
+    {"email": "<user email>"}
+    If the session ID is invalid or the user does not exist,
+    respond with a 403 HTTP status.
+    """
+    session_id = request.cookies.get("session_id")
+    user = AUTH.get_user_from_session_id(session_id)
+    if user:
+        return jsonify({
+            "email": user.email
+        }), 200
+    else:
+        flask.abort(403)
 
 
 if __name__ == "__main__":
