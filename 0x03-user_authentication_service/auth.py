@@ -5,6 +5,7 @@ Module for Authentication
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
 from db import DB
+import uuid
 
 
 def _hash_password(password: str) -> bytes:
@@ -67,3 +68,25 @@ class Auth:
             return False
         except NoResultFound:
             return False
+
+    def _generate_uuid(self) -> str:
+        """
+        return a string representation of a new UUID
+        """
+        return str(uuid.uuid4())
+
+    def create_session(self, email: str) -> str:
+        """
+        Finds the user corresponding to the email,
+        generate a new UUID and store it in the database
+        as the user’s session_id, then return the session ID.
+        args: email (str) - the email of the user
+        Returns: the session ID
+        """
+        try:
+            user = self._db.find_user_by(email=email)
+            session_id = self._generate_uuid()
+            self._db.update_user(user.id, session_id=session_id)
+            return session_id
+        except NoResultFound:
+            return None
