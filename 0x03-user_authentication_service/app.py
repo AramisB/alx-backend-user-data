@@ -155,5 +155,32 @@ def get_reset_password_token():
     }), 200
 
 
+@app.route('/reset_password', methods=['PUT'])
+def update_password():
+    """
+    responds to the PUT /reset_password route.
+    The request is expected to contain form data with fields:
+    "email", "reset_token" and "new_password".
+    Update the password.
+    If the token is invalid, catch the exception
+    and respond with a 403 HTTP code.
+    If the token is valid, respond with a 200 HTTP
+    code and the following JSON payload:
+    {"email": "<user email>", "message": "Password updated"}
+    """
+    data = request.form
+    email = data.get('email')
+    reset_token = data.get('reset_token')
+    new_password = data.get('new_password')
+    try:
+        AUTH.update_password(reset_token, new_password)
+        return jsonify({
+            "email": email,
+            "message": "Password updated"
+        }), 200
+    except Exception:
+        flask.abort(403)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="5000", debug=True)
