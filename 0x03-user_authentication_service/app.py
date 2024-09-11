@@ -147,12 +147,20 @@ def get_reset_password_token():
     data = request.form
     email = data.get('email')
     if not email:
-        flask.abort(403)
-    token = AUTH.get_reset_password_token(email)
-    return jsonify({
-        "email": email,
-        "reset_token": token
-    }), 200
+        return jsonify({
+            "message": "email is required"
+        }), 400
+
+    try:
+        token = AUTH.get_reset_password_token(email)
+        return jsonify({
+            "email": email,
+            "reset_token": token
+        }), 200
+    except ValueError:
+        return jsonify({
+            "message": "email not registered"
+        }), 403
 
 
 @app.route('/reset_password', methods=['PUT'])
