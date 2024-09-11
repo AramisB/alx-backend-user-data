@@ -81,8 +81,8 @@ class DB:
             None
 
         Raises:
-            ValueError: If an invalid attribute is provided.
-            NoResultFound: If no user is found with the given user_id.
+        ValueError: If an invalid attribute is provided.
+        NoResultFound: If no user is found with the given user_id.
         """
         valid_attributes = {
             "email",
@@ -104,3 +104,5 @@ class DB:
 
         except NoResultFound:
             raise NoResultFound(f"No user found with id: {user_id}")
+        except Exception as e:
+            raise e
