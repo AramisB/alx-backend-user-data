@@ -25,6 +25,14 @@ def _hash_password(password: str) -> bytes:
     return hashed_pwd
 
 
+def _generate_uuid(self) -> str:
+    """
+    return a string representation of a new UUID
+    """
+    UUID = uuid4()
+    return str(UUID)
+
+
 class Auth:
     """
     Auth class to interact with the authentication database.
@@ -47,11 +55,12 @@ class Auth:
         """
         try:
             self._db.find_user_by(email=email)
-            raise ValueError(f"User {email} already exists")
         except NoResultFound:
             hashed_password = _hash_password(password)
             new_user = self._db.add_user(email, hashed_password)
             return new_user
+
+        raise ValueError(f"User {email} already exists")
 
     def valid_login(self, email: str, password: str) -> bool:
         """
@@ -69,12 +78,6 @@ class Auth:
             return False
         except NoResultFound:
             return False
-
-    def _generate_uuid(self) -> str:
-        """
-        return a string representation of a new UUID
-        """
-        return str(uuid4())
 
     def create_session(self, email: str) -> str:
         """
