@@ -5,7 +5,7 @@ Module for Authentication
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
 from db import DB
-import uuid
+from uuid import uuid4
 from user import User
 
 
@@ -74,7 +74,7 @@ class Auth:
         """
         return a string representation of a new UUID
         """
-        return str(uuid.uuid4())
+        return str(uuid4())
 
     def create_session(self, email: str) -> str:
         """
