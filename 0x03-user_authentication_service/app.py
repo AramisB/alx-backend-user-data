@@ -11,13 +11,13 @@ app = Flask(__name__)
 AUTH = Auth()
 
 
-@app.route('/')
-def index():
+@app.route('/', methods=['GET'])
+def hello():
     """
     return a JSON payload of the form:
     """
     return jsonify({
-        "message": "Bievenue"
+        "message": "Bienvenue"
     })
 
 
