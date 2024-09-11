@@ -31,9 +31,9 @@ class Auth:
     def __init__(self):
         self._db = DB()
 
-    def register_user(self, email: str, password: str) -> None:
+    def register_user(self, email: str, password: str) -> 'User':
         """
-        Register a new user with the given email and password.
+        Registexr a new user with the given email and password.
         Args:
          email - the email of the user
          password - the password of the user
@@ -49,8 +49,8 @@ class Auth:
             raise ValueError("User {} already exists".format(email))
         except NoResultFound:
             hashed_password = _hash_password(password)
-            self._db.add_user(email, hashed_password)
-            return self._db.find_user_by(email=email)
+            new_user = self._db.add_user(email, hashed_password)
+            return new_user
 
     def valid_login(self, email: str, password: str) -> bool:
         """
